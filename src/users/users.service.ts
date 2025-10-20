@@ -5,12 +5,17 @@ import { AuthService } from 'src/auth/auth.service';
 import { User } from 'src/users/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dtos/create-user.dto';
+import type { ConfigType } from '@nestjs/config';
+import profileConfig from './config/profile.config';
 
 @Injectable()
 export class UsersService {
   constructor(
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
+
+    @Inject(profileConfig.KEY)
+    private readonly profileConfiguration: ConfigType<typeof profileConfig>,
 
     @InjectRepository(User)
     private usersRepository: Repository<User>,

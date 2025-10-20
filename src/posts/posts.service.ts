@@ -33,12 +33,7 @@ export class PostsService {
     //   relations: { metaOption: true },
     // });
 
-    const posts = await this.postsRepository.find({
-      relations: {
-        // user: true,
-        // tags: true,
-      },
-    });
+    const posts = await this.postsRepository.find();
 
     return posts;
   }
