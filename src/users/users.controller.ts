@@ -13,6 +13,7 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { PatchUserDto } from './dtos/patch-user.dto';
+import { CreateManyUsersDto } from './dtos/create-many-users.dto';
 
 @Controller('users')
 export class UsersController {
@@ -41,6 +42,11 @@ export class UsersController {
   @Post()
   public createUser(@Body() body: CreateUserDto) {
     return this.usersService.createUser(body);
+  }
+
+  @Post('create-many')
+  public createManyUsers(@Body() body: CreateManyUsersDto) {
+    return this.usersService.createMany(body);
   }
 
   @Patch()

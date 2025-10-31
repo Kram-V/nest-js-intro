@@ -11,10 +11,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AuthService } from 'src/auth/auth.service';
 
 import { User } from 'src/users/user.entity';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dtos/create-user.dto';
 import type { ConfigType } from '@nestjs/config';
 import profileConfig from './config/profile.config';
+import { UsersCreateManyProvider } from './providers/users-create-many.provider';
+import { CreateManyUsersDto } from './dtos/create-many-users.dto';
 
 @Injectable()
 export class UsersService {
@@ -25,10 +27,10 @@ export class UsersService {
     @Inject(profileConfig.KEY)
     private readonly profileConfiguration: ConfigType<typeof profileConfig>,
 
-    private readonly dataSource: DataSource,
-
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+
+    private readonly usersCreateManyProvider: UsersCreateManyProvider,
   ) {}
 
   public async createUser(data: CreateUserDto) {
@@ -110,32 +112,7 @@ export class UsersService {
     return user;
   }
 
-  public async createMany(data: CreateUserDto[]) {
-    const newUsers: User[] = [];
-
-    // CREATE QUERY RUNNER INSTANCE
-    const queryRunner = this.dataSource.createQueryRunner();
-
-    // CONNECT QUERY RUNNER TO DATASOURCE
-    await queryRunner.connect();
-
-    // START TRANSATION
-    await queryRunner.startTransaction();
-    try {
-      for (const user of data) {
-        const newUser = queryRunner.manager.create(User, user);
-        const result = await queryRunner.manager.save(newUser);
-        newUsers.push(result);
-      }
-
-      // IF SUCCESSFUL COMMIT
-      await queryRunner.commitTransaction();
-    } catch {
-      // IF UNSUCCESFUL ROLLBACK
-      await queryRunner.rollbackTransaction();
-    } finally {
-      // RELEASE CONNECTION
-      await queryRunner.release();
-    }
+  public async createMany(data: CreateManyUsersDto) {
+    return await this.usersCreateManyProvider.createMany(data);
   }
 }

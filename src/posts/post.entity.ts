@@ -83,6 +83,7 @@ export class Post {
     },
     inverseJoinColumn: {
       name: 'tagId',
+
       referencedColumnName: 'id',
     },
   })

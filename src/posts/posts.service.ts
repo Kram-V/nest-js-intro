@@ -10,16 +10,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './post.entity';
 import { Repository } from 'typeorm';
 import { MetaOption } from 'src/meta-options/meta-option.entity';
-import { User } from 'src/users/user.entity';
 import { TagsService } from 'src/tags/tags.service';
 import { PatchPostDto } from './dtos/patch-post.dto';
 import { Tag } from 'src/tags/tag.entity';
+import { GetPostsDto } from './dtos/get-posts.dto';
+import { PaginationProvider } from 'src/common/pagination/providers/pagination.provider';
+import { PaginatedInterface } from 'src/common/pagination/interfaces/paginated.interface';
 
 @Injectable()
 export class PostsService {
   constructor(
     private readonly usersService: UsersService,
     private readonly tagsService: TagsService,
+    private readonly paginationProvider: PaginationProvider,
 
     @InjectRepository(Post) private postsRepository: Repository<Post>,
 
@@ -27,7 +30,10 @@ export class PostsService {
     private metaOptionsRepository: Repository<MetaOption>,
   ) {}
 
-  public async findAll(userId: number) {
+  public async findAll(
+    postQuery: GetPostsDto,
+    userId: number,
+  ): Promise<PaginatedInterface<Post>> {
     const user = this.usersService.findOneById(userId);
 
     // if the eager: true is not set
@@ -35,7 +41,10 @@ export class PostsService {
     //   relations: { metaOption: true },
     // });
 
-    const posts = await this.postsRepository.find();
+    const posts = await this.paginationProvider.paginateQuery(
+      postQuery,
+      this.postsRepository,
+    );
 
     return posts;
   }
@@ -62,7 +71,7 @@ export class PostsService {
   }
 
   public async update(data: PatchPostDto, id: number) {
-    let tags: Tag[] | null;
+    let tags: Tag[] | null = null;
 
     try {
       tags = await this.tagsService.findMultipleTags(data.tags ?? []);
