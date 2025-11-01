@@ -17,6 +17,8 @@ import type { ConfigType } from '@nestjs/config';
 import profileConfig from './config/profile.config';
 import { UsersCreateManyProvider } from './providers/users-create-many.provider';
 import { CreateManyUsersDto } from './dtos/create-many-users.dto';
+import { CreateUserProvider } from './providers/create-user.provider';
+import { FindOneUserByEmailProvider } from 'src/auth/providers/find-one-user-by-email.provider';
 
 @Injectable()
 export class UsersService {
@@ -31,44 +33,12 @@ export class UsersService {
     private usersRepository: Repository<User>,
 
     private readonly usersCreateManyProvider: UsersCreateManyProvider,
+    private readonly createUserProvider: CreateUserProvider,
+    private readonly findOneUserByEmailProvider: FindOneUserByEmailProvider,
   ) {}
 
   public async createUser(data: CreateUserDto) {
-    let existingUser: User | null;
-
-    try {
-      existingUser = await this.usersRepository.findOne({
-        where: { email: data.email },
-      });
-    } catch {
-      throw new RequestTimeoutException(
-        'Unable to process your request at the moment please try again later',
-        {
-          description: 'Error Connecting to Database',
-        },
-      );
-    }
-
-    if (existingUser) {
-      throw new BadRequestException(
-        'The user is already existing, please check your email provided',
-      );
-    }
-
-    let newUser = this.usersRepository.create(data);
-
-    try {
-      newUser = await this.usersRepository.save(newUser);
-    } catch {
-      throw new RequestTimeoutException(
-        'Unable to process your request at the moment please try again later',
-        {
-          description: 'Error Connecting to Database',
-        },
-      );
-    }
-
-    return newUser;
+    return await this.createUserProvider.createUser(data);
   }
 
   public findAll(
@@ -114,5 +84,9 @@ export class UsersService {
 
   public async createMany(data: CreateManyUsersDto) {
     return await this.usersCreateManyProvider.createMany(data);
+  }
+
+  public async findOneByEmail(email: string) {
+    return await this.findOneUserByEmailProvider.findOneByEmail(email);
   }
 }
