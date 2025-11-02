@@ -12,7 +12,6 @@ import {
   Matches,
   MaxLength,
   MinLength,
-  ValidateNested,
 } from 'class-validator';
 import { CreateMetaOptionDto } from 'src/meta-options/dtos/create-meta-option.dto';
 import { PostType, Status } from 'src/posts/enums/posts.enum';
@@ -64,7 +63,6 @@ export class CreatePostDto {
   tags?: number[];
 
   @IsOptional()
-  @ValidateNested({ each: true })
   @Type(() => CreateMetaOptionDto)
   metaOption?: CreateMetaOptionDto | null;
 

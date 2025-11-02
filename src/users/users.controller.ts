@@ -19,7 +19,6 @@ import { CreateManyUsersDto } from './dtos/create-many-users.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // Matches BOTH: GET /users  and  GET /users/:id
   @Get(['', ':id'])
   public getUsers(
     @Param('id', new ParseIntPipe({ optional: true })) id?: number,

@@ -8,6 +8,8 @@ import { FindOneUserByEmailProvider } from './providers/find-one-user-by-email.p
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import jwtConfig from './config/jwt.config';
+import { AuthenticationGuard } from './guards/authentication.guard';
+import { AccessTokenGuard } from './guards/access-token.guard';
 
 @Module({
   controllers: [AuthController],
@@ -18,12 +20,19 @@ import jwtConfig from './config/jwt.config';
       provide: HashingProvider,
       useClass: BcryptProvider,
     },
+    AuthenticationGuard,
+    AccessTokenGuard,
   ],
   imports: [
     forwardRef(() => UsersModule),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
-  exports: [AuthService, HashingProvider],
+  exports: [
+    AuthService,
+    HashingProvider,
+    AuthenticationGuard,
+    AccessTokenGuard,
+  ],
 })
 export class AuthModule {}

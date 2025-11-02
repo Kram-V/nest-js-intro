@@ -6,10 +6,14 @@ import {
 import { User } from '../user.entity';
 import { DataSource } from 'typeorm';
 import { CreateManyUsersDto } from '../dtos/create-many-users.dto';
+import { HashingProvider } from 'src/auth/providers/hashing.provider';
 
 @Injectable()
 export class UsersCreateManyProvider {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly hashingProvider: HashingProvider,
+  ) {}
 
   public async createMany(data: CreateManyUsersDto) {
     const newUsers: User[] = [];
@@ -30,6 +34,11 @@ export class UsersCreateManyProvider {
     try {
       for (const user of data.users) {
         const newUser = queryRunner.manager.create(User, user);
+
+        newUser.password = await this.hashingProvider.hashPassword(
+          newUser.password,
+        );
+
         const result = await queryRunner.manager.save(newUser);
         newUsers.push(result);
       }

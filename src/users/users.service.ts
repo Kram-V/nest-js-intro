@@ -62,7 +62,7 @@ export class UsersService {
   }
 
   public async findOneById(id: number) {
-    let user: User | null;
+    let user: User | null = null;
 
     try {
       user = await this.usersRepository.findOneBy({ id });

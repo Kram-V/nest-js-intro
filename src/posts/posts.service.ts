@@ -32,10 +32,7 @@ export class PostsService {
 
   public async findAll(
     postQuery: GetPostsDto,
-    userId: number,
   ): Promise<PaginatedInterface<Post>> {
-    const user = this.usersService.findOneById(userId);
-
     // if the eager: true is not set
     // const posts = await this.postsRepository.find({
     //   relations: { metaOption: true },
